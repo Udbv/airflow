@@ -41,7 +41,7 @@
 {{- $safeToEvict := dict "cluster-autoscaler.kubernetes.io/safe-to-evict" (.Values.workers.safeToEvict | toString) }}
 {{- $podAnnotations := mergeOverwrite (deepCopy .Values.airflowPodAnnotations) $safeToEvict .Values.workers.podAnnotations }}
 apiVersion: apps/v1
-kind: {{ if $persistence }}StatefulSet{{ else }}Deployment{{ end }}
+kind: StatefulSet
 metadata:
   name: {{ include "airflow.fullname" . }}-worker
   labels:
@@ -57,9 +57,7 @@ metadata:
   annotations: {{- toYaml .Values.workers.annotations | nindent 4 }}
   {{- end }}
 spec:
-  {{- if $persistence }}
   serviceName: {{ include "airflow.fullname" . }}-worker
-  {{- end }}
   {{- if and (not $keda) (not $hpa) }}
   replicas: {{ .Values.workers.replicas }}
   {{- end }}
